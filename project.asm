@@ -6,6 +6,7 @@
     ; DEFINE YOUR VARIABLES
     
     registered_users db "lara$", "victor$", "bruce$", "%" ; for varifying if the user_input for username is valid
+    password_arr db "raider", "vic", "Batcave28", "%"     ; for varifying if the user_input for password is valid
     incorrect_input db 0AH, 0DH, "Incorrect Username/Password$"
     l dw ?  
     
@@ -19,7 +20,7 @@
     username_length dw ?    ; returned length from the "lencounter" procedure will be sotred here
     password_length dw ?    ; returned length from the "lencounter" procedure will be sotred here
     
-    elem_num db ?
+    elem_num db 0  ; for matching index number of registered_users with the prompted username. (getting the right user and their password)
     new_line db 0AH, 0DH, "$"   ; prepared an arr to print new_line                      
     output db 0AH, 0DH, "Your Entered Stirng: $"
      
@@ -94,7 +95,11 @@
         jmp exit
         
         
-        ; Define all the functions here
+        
+        
+        ; Define all the functions / Procedures from here
+        
+        ;take_input start
         take_input proc
             ;mov bx, 0
             mov ah, 1
@@ -106,19 +111,20 @@
                 cmp al, 13
                 jne while_input
             dec si
-            ;mov entered_username[bx], "$"
             mov [si], "$"
         ret
         take_input endp
+        ;take_input end
         
                 
-        mov ah, 2
-        mov dl, 10
-        int 21h
-        mov dl, 13
-        int 21h
+        ;mov ah, 2
+        ;mov dl, 10
+        ;int 21h
+        ;mov dl, 13
+        ;int 21h
         
         
+        ;print start
         print proc
             mov dx, [si]
             cmp dl, "$"
@@ -130,8 +136,11 @@
         
         exit_print:    
         ret
-        print endp    
-
+        print endp
+        ;print start
+        
+        
+        ; lencounter start
         lencounter proc
             looop:
             mov al, [si]
@@ -145,8 +154,12 @@
             mov length, bx
             ret            
         lencounter endp
+        ; lencounter end
         
+        
+        ;check_valid_username start
         check_valid_username proc
+            mov elem_num, 0
             outer_loop:
                 
                 cmp cx, ax
@@ -175,8 +188,12 @@
                     mov dl, [si]
                     inc si
                     cmp dl, "$"
-                    je outer_loop
+                    je outer
                     jmp continue
+                    
+                outer:
+                    add elem_num, 1
+                    jmp outer_loop
                     
                 for_smaller_input:
                     jmp return_false
@@ -192,15 +209,23 @@
                 jmp outer_loop
         
         
-        exit_outer:    
-        ret
-        check_valid_username endp
-
+        exit_outer:
+            add elem_num, 1
+            jmp exit_func
         
         return_false:
+            mov elem_num, 0
             lea dx, incorrect_input
             mov ah, 9
             int 21h
+            
+        exit_func:    
+        ret
+        check_valid_username endp
+        ;check_valid_username end
+        
+        
+        
         
         ; YOUR CODE ENDS HERE
         exit:
