@@ -6,7 +6,7 @@
     ; DEFINE YOUR VARIABLES
     
     registered_users db "lara$", "victor$", "bruce$", "%" ; for varifying if the user_input for username is valid
-    password_arr db "raider", "vic", "Batcave28", "%"     ; for varifying if the user_input for password is valid
+    password_arr db "raider$", "vic$", "Batcave28$", "%"     ; for varifying if the user_input for password is valid
     incorrect_input db 0AH, 0DH, "Incorrect Username/Password$"
     l dw ?  
     
@@ -32,6 +32,8 @@
         MOV DS, AX
         
         ; YOUR CODE STARTS HERE
+        
+        ;call debug_si
         
         
         lea dx, enter_username
@@ -89,7 +91,8 @@
         add ax, 1
         call check_valid_username
         mov l, cx
-        jmp exit
+        
+        call load_pass
         
         
         jmp exit
@@ -116,12 +119,7 @@
         take_input endp
         ;take_input end
         
-                
-        ;mov ah, 2
-        ;mov dl, 10
-        ;int 21h
-        ;mov dl, 13
-        ;int 21h
+
         
         
         ;print start
@@ -224,6 +222,67 @@
         check_valid_username endp
         ;check_valid_username end
         
+        
+        ; load_pass start
+        load_pass proc
+            lea si, password_arr
+            mov bl, elem_num
+            
+            cmp bl, 0
+            jg return_mapped_password
+            
+            jmp no_matching_username
+            
+            return_mapped_password:
+                sub bx, 1
+                get_index_of_pass:
+                    per_pass:
+                        mov dx, [si]
+                        inc si
+                        cmp dl, "$"
+                        je dec_bx
+                        cmp bl, 0
+                        je exit_per_pass
+                        jmp per_pass
+                        dec_bx:
+                            dec bx
+                            jmp per_pass
+                exit_per_pass:
+                sub si, 1            
+                call print
+                jmp exit_load_pass
+                
+            no_matching_username:
+               lea dx, incorrect_input
+               mov ah, 9
+               int 21h
+                
+        exit_load_pass:
+        ret
+        load_pass endp
+        ; load_pass start
+        
+        
+        
+        
+        
+        
+        
+        
+        debug_si proc
+            lea si, password_arr
+            mov ah, 2
+            loooop:
+                mov dx, [si]
+                int 21h
+                cmp dl, "%"
+                je exit_loooop
+                inc si
+                jmp loooop
+            
+        exit_loooop:
+        ret
+        debug_si endp
         
         
         
