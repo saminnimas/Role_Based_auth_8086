@@ -50,6 +50,14 @@ while True:
             # store the returned statements in a variable
 
 
+        def load_pass(user_occurrence, passwrd_arr) -> str or int:
+            if user_occurrence > 0:
+                return passwrd_arr[user_occurrence - 1]
+            else:
+                return 0
+            # store the returned statements in a variable
+
+
         def authenticate(validated_username, loaded_pass, user_pass):
             if validated_username <= 0:
                 return False
@@ -66,14 +74,6 @@ while True:
                             return False
                     return True
                 # store the returned statements in a variable
-
-
-        def load_pass(user_occurrence, passwrd_arr) -> str or int:
-            if user_occurrence > 0:
-                return passwrd_arr[user_occurrence - 1]
-            else:
-                return 0
-            # store the returned statements in a variable
 
 
         def view_grade(id_arr, reg_user, mark_arr):
@@ -134,6 +134,7 @@ while True:
                 break
         else:
             print("Invalid Username/Password")
+            break
 
     end_p = input("End Program? (y/n)")
     if end_p == 'y':

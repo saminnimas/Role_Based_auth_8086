@@ -1,23 +1,26 @@
-; Make sure each fucntion is called; otherwise program will end up in an infinite loop
+; Make sure each function is called; otherwise program will end up in an infinite loop
 
 .MODEL SMALL
 .STACK 100H
 .DATA                         
     ; DEFINE YOUR VARIABLES
     
-    registered_users db "lara$", "victor$", "bruce$", "%"
-    err dw 0AH, 0DH, "no match found$"
+    registered_users db "lara$", "victor$", "bruce$", "%" ; for varifying if the user_input for username is valid
+    incorrect_input db 0AH, 0DH, "Incorrect Username/Password$"
     l dw ?  
     
-    enter_username dw "Enter Username: $"
-    enter_pass dw "Enter Password: $"
-    entered_username db 20 dup(?)
-    entered_password dw 20 dup(?)
-    length dw ?
-    username_length dw ?
-    password_length dw ?
+    enter_username dw "Enter Username: $" ; Output text prompting username
+    enter_pass dw "Enter Password: $"     ; Output text prompting password
+    
+    entered_username db 20 dup(?)    ; Temporary array for storing and comparing prompted username with registered users 
+    entered_password dw 20 dup(?)    ; Temporary array for storing and comparing prompted username with registered users password
+    
+    length dw ?   ; Temporary variable
+    username_length dw ?    ; returned length from the "lencounter" procedure will be sotred here
+    password_length dw ?    ; returned length from the "lencounter" procedure will be sotred here
+    
     elem_num db ?
-    new_line db 0AH, 0DH, "$"                        
+    new_line db 0AH, 0DH, "$"   ; prepared an arr to print new_line                      
     output db 0AH, 0DH, "Your Entered Stirng: $"
      
    
@@ -184,8 +187,8 @@
                     jmp outer_loop
                 
  
-                mov ah, 2
-                int 21h
+                ;mov ah, 2
+                ;int 21h
                 jmp outer_loop
         
         
@@ -195,7 +198,7 @@
 
         
         return_false:
-            lea dx, err
+            lea dx, incorrect_input
             mov ah, 9
             int 21h
         
