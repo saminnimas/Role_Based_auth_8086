@@ -8,6 +8,7 @@
     registered_users db "lara$", "victor$", "bruce$", "%" ; for varifying if the user_input for username is valid
     password_arr db "raider$", "vic$", "Batcave28$", "%"     ; for varifying if the user_input for password is valid
     incorrect_input db 0AH, 0DH, "Incorrect Username/Password$"
+    validated db 0AH, 0DH, "WELCOME!!$"
     l dw ?  
     
     enter_username dw "Enter Username: $" ; Output text prompting username
@@ -15,11 +16,13 @@
     
     entered_username db 20 dup(?)    ; Temporary array for storing and comparing prompted username with registered users 
     entered_password dw 20 dup(?)    ; Temporary array for storing and comparing prompted username with registered users password
+    is_authenticated dw ?  ; For checking authentication status, 0 or 1 (i.e. True or False)
     
     length dw ?   ; Temporary variable
     username_length dw ?    ; returned length from the "lencounter" procedure will be sotred here
-    password_length dw ?    ; returned length from the "lencounter" procedure will be sotred here
+    password_length db ?    ; returned length from the "lencounter" procedure will be sotred here
     loaded_pass_length dw ?
+    loading_pass db 1   ; By default laoding_pass is successful (1). But is 0 if conditions not met. check load_pass
     
     new_line db 0AH, 0DH, "$"   ; prepared an arr to print new_line                      
     output db 0AH, 0DH, "Your Entered Stirng: $"
@@ -80,7 +83,7 @@
         mov bx, 0                 ; counter
         call lencounter
         mov dx, length
-        mov password_length, dx
+        mov password_length, dl
         
         lea dx, output
         mov ah, 9
@@ -108,6 +111,8 @@
         sub bx, store_pass_start_idx
         
         mov loaded_pass_length, bx
+        
+        call authenticate
         
         
         jmp exit
@@ -228,9 +233,9 @@
         
         return_false:
             mov elem_num, 0
-            lea dx, incorrect_input
-            mov ah, 9
-            int 21h
+            ;lea dx, incorrect_input
+            ;mov ah, 9
+            ;int 21h
             
         exit_func:    
         ret
@@ -270,15 +275,84 @@
                 jmp exit_load_pass
                 
             no_matching_username:
-               lea dx, incorrect_input
-               mov ah, 9
-               int 21h
+               mov loading_pass, 0
+               ;lea dx, incorrect_input
+               ;mov ah, 9
+               ;int 21h
                 
         exit_load_pass:
         ret
         load_pass endp
         ; load_pass start
+                         
         
+        ; authenticate start
+        ;use elem_num, si from load_pass, the prompted password
+        ;return by storing returned value in is_authenticated
+        authenticate proc
+            mov bl, elem_num
+            cmp bl, 0
+            jle authentication_false
+            
+            mov bl, loading_pass
+            cmp bl, 0
+            je authentication_false
+            
+            mov bl, password_length
+            mov cx, loaded_pass_length
+            cmp bl, cl
+            jl authentication_false
+            
+            mov bl, password_length
+            mov cx, loaded_pass_length
+            cmp bl, cl
+            jg authentication_false
+            
+            mov cx, loaded_pass_length
+            
+            authenticate_loop:
+                lea bx, entered_password
+                mov si, store_pass_start_idx
+                
+                mov ax, [bx]
+                mov dl, [si]
+                
+                cmp al, dl
+                jne authentication_false
+
+                
+                inc bx
+                inc si
+                
+                loop authenticate_loop
+            loop_terminated:
+                mov is_authenticated, 1
+                cmp cl, 0
+                je exit_authenticate
+            
+            
+            
+            authentication_false:
+                mov is_authenticated, 0
+                jmp exit_authenticate
+                
+        exit_authenticate:
+            mov bx, is_authenticated
+            cmp bl, 1
+            je authenticated
+            lea dx, incorrect_input
+            mov ah, 9
+            int 21h
+            jmp final_exit
+            authenticated:
+                lea dx, validated
+                mov ah, 9
+                int 21h
+                jmp final_exit
+        final_exit:    
+        ret
+        authenticate endp
+        ; authenticate end
         
         
         
