@@ -19,10 +19,14 @@
     length dw ?   ; Temporary variable
     username_length dw ?    ; returned length from the "lencounter" procedure will be sotred here
     password_length dw ?    ; returned length from the "lencounter" procedure will be sotred here
+    loaded_pass_length dw ?
     
-    elem_num db 0  ; for matching index number of registered_users with the prompted username. (getting the right user and their password)
     new_line db 0AH, 0DH, "$"   ; prepared an arr to print new_line                      
     output db 0AH, 0DH, "Your Entered Stirng: $"
+    
+    elem_num db 0  ; for matching index number of registered_users with the prompted username. (getting the right user and their password)
+    store_pass_start_idx dw 0  ; for storing the si, calculated from load_pass func
+    store_pass_last_idx dw 0  ; for storing the last si, calculated from load_pass func, to get the stored pass's length
      
    
 .CODE  
@@ -93,6 +97,17 @@
         mov l, cx
         
         call load_pass
+        lea dx, new_line
+        mov ah, 9
+        int 21h
+        
+        mov si, store_pass_start_idx
+        call print
+        
+        mov bx, store_pass_last_idx
+        sub bx, store_pass_start_idx
+        
+        mov loaded_pass_length, bx
         
         
         jmp exit
@@ -248,8 +263,10 @@
                             dec bx
                             jmp per_pass
                 exit_per_pass:
-                sub si, 1            
+                sub si, 1
+                mov store_pass_start_idx, si           
                 call print
+                mov store_pass_last_idx, si
                 jmp exit_load_pass
                 
             no_matching_username:
