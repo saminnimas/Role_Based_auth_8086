@@ -5,10 +5,11 @@
 .DATA                         
     ; DEFINE YOUR VARIABLES
     
-    registered_users db "lara$", "victor$", "bruce$", "%" ; for varifying if the user_input for username is valid
-    password_arr db "raider$", "vic$", "Batcave289$", "%"     ; for varifying if the user_input for password is valid
+    registered_users db "victor$", "bruce$", "lara$", "%" ; for varifying if the user_input for username is valid
+    password_arr db "vic$", "Batcave28$", "raider$", "%"     ; for varifying if the user_input for password is valid
+    
     incorrect_input db 0AH, 0DH, "Incorrect Username/Password$"
-    validated db 0AH, 0DH, "WELCOME!!$"
+    validated db 0AH, 0DH, "!!WELCOME!!$"
     l dw ?  
     
     enter_username dw "Enter Username: $" ; Output text prompting username
