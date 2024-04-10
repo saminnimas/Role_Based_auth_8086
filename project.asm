@@ -6,7 +6,7 @@
     ; DEFINE YOUR VARIABLES
     
     registered_users db "lara$", "victor$", "bruce$", "%" ; for varifying if the user_input for username is valid
-    password_arr db "raider$", "vic$", "Batcave28$", "%"     ; for varifying if the user_input for password is valid
+    password_arr db "raider$", "vic$", "Batcave289$", "%"     ; for varifying if the user_input for password is valid
     incorrect_input db 0AH, 0DH, "Incorrect Username/Password$"
     validated db 0AH, 0DH, "WELCOME!!$"
     l dw ?  
@@ -15,7 +15,7 @@
     enter_pass dw "Enter Password: $"     ; Output text prompting password
     
     entered_username db 20 dup(?)    ; Temporary array for storing and comparing prompted username with registered users 
-    entered_password dw 20 dup(?)    ; Temporary array for storing and comparing prompted username with registered users password
+    entered_password db 20 dup(?)    ; Temporary array for storing and comparing prompted username with registered users password
     is_authenticated dw ?  ; For checking authentication status, 0 or 1 (i.e. True or False)
     
     length dw ?   ; Temporary variable
