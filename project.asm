@@ -7,9 +7,9 @@
     
     registered_users db "victor$", "bruce$", "lara$", "clerk$", "joy$", "jim$", "%" ; for varifying if the user_input for username is valid
     password_arr db "vic$", "Batcave28$", "raider$", "lane$", "enjoy$", "pam$", "%"  ; for varifying if the user_input for password is valid
-    user_role db "t", "t", "s", "s", "s", "s", "%"  ; For Distinguishing between teachers abd students
+    user_role db "t", "t", "s", "s", "s", "s", "%"  ; For Distinguishing between teachers and students
     id_s db "0", "0", "1", "2", "3", "4", "%"
-    marks db 0, 0, 85, 80, 95
+    marks db "0$", "0$", "86$", "80$", "100$", "79$", "%"
     
     incorrect_input db 0AH, 0DH, "Incorrect Username/Password$"
     validated db 0AH, 0DH, "!!WELCOME!!$"
@@ -23,7 +23,7 @@
     is_authenticated dw ?  ; For checking authentication status, 0 or 1 (i.e. True or False)
     set_role db ?
     set_id db ?
-    set_marks db ?
+    set_marks dw ?
     
     length dw ?   ; Temporary variable
     username_length dw ?    ; returned length from the "lencounter" procedure will be sotred here
@@ -131,10 +131,19 @@
         mov ah, 2
         int 21h
         
-        mov dl, set_marks
-        mov ah, 2
-        int 21h
         
+        mov si, set_marks
+        mov ah, 2
+        
+        print_marks:
+            mov dx, [si]
+            cmp dl, "$"
+            je exit_print_marks
+            inc si
+            int 21h
+            jmp print_marks
+        
+        exit_print_marks:
         
         jmp exit
         
@@ -411,15 +420,22 @@
             mov bl, elem_num
             
             while_for_marks:
-                cmp bl, 0
+                cmp bl, 1
                 je exit_while_for_marks
-                mov dx, [si]
-                inc si
+                inner_while:
+                    mov dx, [si]
+                    cmp dl, "$"
+                    je exit_inner_while
+                    inc si
+                    jmp inner_while
+                exit_inner_while:
                 dec bl
+                inc si
                 jmp while_for_marks
                 
             exit_while_for_marks:
-            mov set_marks, dl 
+            ;sub si, 1
+            mov set_marks, si 
                
         
         ret
