@@ -5,8 +5,11 @@
 .DATA                         
     ; DEFINE YOUR VARIABLES
     
-    registered_users db "victor$", "bruce$", "lara$", "%" ; for varifying if the user_input for username is valid
-    password_arr db "vic$", "Batcave28$", "raider$", "%"     ; for varifying if the user_input for password is valid
+    registered_users db "victor$", "bruce$", "lara$", "clerk$", "joy$", "jim$", "%" ; for varifying if the user_input for username is valid
+    password_arr db "vic$", "Batcave28$", "raider$", "lane$", "enjoy$", "pam$", "%"  ; for varifying if the user_input for password is valid
+    user_role db "t", "t", "s", "s", "s", "s", "%"  ; For Distinguishing between teachers abd students
+    id_s db "0", "0", "1", "2", "3", "4", "%"
+    marks db 0, 0, 85, 80, 95
     
     incorrect_input db 0AH, 0DH, "Incorrect Username/Password$"
     validated db 0AH, 0DH, "!!WELCOME!!$"
@@ -18,6 +21,9 @@
     entered_username db 20 dup(?)    ; Temporary array for storing and comparing prompted username with registered users 
     entered_password db 20 dup(?)    ; Temporary array for storing and comparing prompted username with registered users password
     is_authenticated dw ?  ; For checking authentication status, 0 or 1 (i.e. True or False)
+    set_role db ?
+    set_id db ?
+    set_marks db ?
     
     length dw ?   ; Temporary variable
     username_length dw ?    ; returned length from the "lencounter" procedure will be sotred here
@@ -114,6 +120,20 @@
         mov loaded_pass_length, bx
         
         call authenticate
+        
+        call get_role_id_marks
+        mov dl, set_role
+        mov ah, 2
+        int 21h
+        
+        mov dl, set_id
+        ;add dl, 30
+        mov ah, 2
+        int 21h
+        
+        mov dl, set_marks
+        mov ah, 2
+        int 21h
         
         
         jmp exit
@@ -354,7 +374,75 @@
         ret
         authenticate endp
         ; authenticate end
+                                 
+                                 
+        ; get_role_id_marks start
+        ;make sure this func in invoked only is is_authenticated is 1
+        get_role_id_marks proc
+            lea si, user_role
+            mov bl, elem_num  ; looping variable
+            
+            while_for_role:
+                cmp bl, 0
+                je exit_while_for_role
+                mov dx, [si]
+                inc si
+                dec bl
+                jmp while_for_role
+            
+            exit_while_for_role:
+            mov set_role, dl
+            
+            lea si, id_s
+            mov bl, elem_num
+            
+            while_for_id:
+                cmp bl, 0
+                je exit_while_for_id
+                mov dx, [si]
+                inc si
+                dec bl
+                jmp while_for_id
+            
+            exit_while_for_id:
+            mov set_id, dl
+            
+            lea si, marks
+            mov bl, elem_num
+            
+            while_for_marks:
+                cmp bl, 0
+                je exit_while_for_marks
+                mov dx, [si]
+                inc si
+                dec bl
+                jmp while_for_marks
+                
+            exit_while_for_marks:
+            mov set_marks, dl 
+               
         
+        ret
+        get_role_id_marks endp
+        ; get_role_id_marks end
+        
+        
+        ; algorithm for updating start
+        ;lea si, marks
+        ;mov bx, 0
+        ;add si, 5
+        ;mov cx, 2
+        ;mov ah, 2
+        ;while:
+            ;mov bl, str[al]    
+            ;mov [si], bl
+            ;mov al, str[bx]
+            ;mov [si], al
+            ;int 21h
+            ;inc bx
+            ;inc si
+        ;loop while
+        ; algorithm for updating end
         
         
         
