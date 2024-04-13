@@ -10,6 +10,7 @@ user_role = ['t', 't', 's', 's', 's', 's', 's', 's']
 id_s = [0, 0, 1, 2, 3, 4, 5, 6]
 marks = [0, 0, 85, 80, 95, 75, 39, 66]
 
+
 while True:
     username = input("Enter Username: ")
     password = input('Enter Password: ')
@@ -91,7 +92,7 @@ while True:
         def update_grades(reg_user, mark_arr):
             select_id = int(input("Enter ID: ")) + 2
             if 0 < select_id < len(id_s) + 1:
-                print(f"ID: {select_id}, Name: {reg_user[select_id - 1]}, Marks: {mark_arr[select_id - 1]}")
+                print(f"ID: {select_id - 2}, Name: {reg_user[select_id - 1]}, Marks: {mark_arr[select_id - 1]}")
                 update = int(input("Input Updated Marks: "))
                 marks[select_id - 1] = update
                 print("updated Result")
