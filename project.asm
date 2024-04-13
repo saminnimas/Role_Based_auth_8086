@@ -13,6 +13,7 @@
     
     incorrect_input db 0AH, 0DH, "Incorrect Username/Password$"
     validated db 0AH, 0DH, "!!WELCOME!!$"
+    exit_text db 0AH, 0DH, "BYE  :($"
     l dw ?  
     
     enter_username dw "Enter Username: $" ; Output text prompting username
@@ -27,6 +28,7 @@
     set_role db ?
     set_id db ?
     set_marks dw ?
+    loggedout db ?
     
     length dw ?   ; Temporary variable
     username_length dw ?    ; returned length from the "lencounter" procedure will be sotred here
@@ -53,141 +55,177 @@
         
         ;call debug_si
         
-        
-        lea dx, enter_username
-        mov ah, 9
-        int 21h
-        
-        
-        lea si, entered_username
-        call take_input
-        
-        lea si, entered_username  ; getting offset of username input 
-        mov bx, 0                 ; counter
-        call lencounter
-        mov dx, length
-        mov username_length, dx
-        
-        
-        lea dx, output
-        mov ah, 9
-        int 21h
-        
-        lea si, entered_username
-        call print
-        
-        mov dx, 0
-        
-        lea dx, new_line
-        mov ah, 9
-        int 21h
-        
-        lea dx, enter_pass
-        mov ah, 9
-        int 21h
-        
-        
-        lea si, entered_password
-        call take_input
-        
-        lea si, entered_password  ; getting offset of username input 
-        mov bx, 0                 ; counter
-        call lencounter
-        mov dx, length
-        mov password_length, dl
-        
-        ;lea dx, output             ; uncomment
-        ;mov ah, 9                  ; uncomment
-        ;int 21h                    ; uncomment
-        
-        ;lea si, entered_password   ; uncomment
-        ;call print                 ; uncomment
-        
-        lea si, registered_users
-        mov ax, username_length
-        add ax, 1
-        call check_valid_username
-        mov l, cx
-        
-        call load_pass
-        lea dx, new_line
-        mov ah, 9
-        int 21h
-        
-        mov si, store_pass_start_idx
-        ;call print
-        
-        mov bx, store_pass_last_idx
-        sub bx, store_pass_start_idx
-        
-        mov loaded_pass_length, bx
-        
-        call authenticate
-        
-        if_authenticated:
-            lea dx, new_line
+        program_flow:
+            lea dx, enter_username
             mov ah, 9
             int 21h
+            
+            
             lea si, entered_username
-            call print
-        
+            call take_input
+            
+            lea si, entered_username  ; getting offset of username input 
+            mov bx, 0                 ; counter
+            call lencounter
+            mov dx, length
+            mov username_length, dx
+            
+            
+            ;lea dx, output
+            ;mov ah, 9
+            ;int 21h
+            
+            ;lea si, entered_username
+            ;call print
+            
+            mov dx, 0
+            
             lea dx, new_line
             mov ah, 9
             int 21h
             
-            mov bx, is_authenticated
-            cmp bx, 0
-            je else_not_authenticated
-        
-            call get_role_id_marks
-            mov dl, set_role
-            cmp dl, "s"
-            je loggedin_student_info
-            jmp loggedin_teacher
-            
-            loggedin_student_info:
-                mov dl, set_id
-                ;add dl, 30
-                mov ah, 2
-                int 21h
-                
-                lea dx, space
-                mov ah, 9
-                int 21h
-                
-                mov si, set_marks
-                mov ah, 2
-                
-                print_marks:
-                    mov dx, [si]
-                    cmp dl, "$"
-                    je exit_print_marks
-                    inc si
-                    int 21h
-                    jmp print_marks
-                
-                exit_print_marks:
-                jmp logout_option_stu
-            
-            loggedin_teacher:
-                lea si, view_update
-                call print
+            lea dx, enter_pass
+            mov ah, 9
+            int 21h
             
             
-            logout_option_stu:
-            ; out of 2 loops the inner "break" statement will go here
-            ; only add 'y' for student
+            lea si, entered_password
+            call take_input
+            
+            lea si, entered_password  ; getting offset of username input 
+            mov bx, 0                 ; counter
+            call lencounter
+            mov dx, length
+            mov password_length, dl
+            
+            
+            loggedin_flow:
+            
+                ;lea dx, output             ; uncomment
+                ;mov ah, 9                  ; uncomment
+                ;int 21h                    ; uncomment
+                
+                ;lea si, entered_password   ; uncomment
+                ;call print                 ; uncomment
+                
+                lea si, registered_users
+                mov ax, username_length
+                add ax, 1
+                call check_valid_username
+                mov l, cx
+                
+                call load_pass
                 lea dx, new_line
                 mov ah, 9
                 int 21h
-                lea si, logout_student
-                call print
-        
-        else_not_authenticated:
-        ; will also break from the inner loop
-        
-        break:
-        ; break for outer loop
+                
+                mov si, store_pass_start_idx
+                ;call print
+                
+                mov bx, store_pass_last_idx
+                sub bx, store_pass_start_idx
+                
+                mov loaded_pass_length, bx
+                
+                call authenticate
+                
+                if_authenticated:
+                    mov bx, is_authenticated
+                    cmp bx, 0
+                    je else_not_authenticated
+                    
+                    lea dx, new_line
+                    mov ah, 9
+                    int 21h
+                    lea si, entered_username
+                    call print
+                
+                    lea dx, new_line
+                    mov ah, 9
+                    int 21h
+                
+                    call get_role_id_marks
+                    mov dl, set_role
+                    cmp dl, "s"
+                    je loggedin_student_info
+                    jmp loggedin_teacher
+                    
+                    loggedin_student_info:
+                        mov dl, set_id
+                        ;add dl, 30
+                        mov ah, 2
+                        int 21h
+                        
+                        lea dx, space
+                        mov ah, 9
+                        int 21h
+                        
+                        mov si, set_marks
+                        mov ah, 2
+                        
+                        print_marks:
+                            mov dx, [si]
+                            cmp dl, "$"
+                            je exit_print_marks
+                            inc si
+                            int 21h
+                            jmp print_marks
+                        
+                        exit_print_marks:
+                        jmp logout_option_stu
+                    
+                    loggedin_teacher:
+                        lea si, view_update
+                        call print
+                        lea dx, new_line
+                        mov ah, 9
+                        int 21h
+                        lea si, logout_teacher
+                        call print
+                        lea si, loggedout
+                        call take_input
+                        lea si, loggedout
+                        mov bx, [si]
+                        cmp bl, "y"
+                        je break_loggedin_flow
+                        lea dx, new_line
+                        mov ah, 9
+                        int 21h
+                        jmp if_authenticated
+                    
+                    
+                    logout_option_stu:
+                    ; out of 2 loops the inner "break" statement will go here
+                    ; only add 'y' for student
+                        lea dx, new_line
+                        mov ah, 9
+                        int 21h
+                        lea si, logout_student
+                        call print
+                        lea si, loggedout
+                        call take_input
+                        lea si, loggedout
+                        mov bx, [si]
+                        cmp bl, "y"
+                        je break_loggedin_flow
+                        lea dx, new_line
+                        mov ah, 9
+                        int 21h
+                        jmp if_authenticated
+            
+            break_loggedin_flow:
+            jmp inner_break
+            else_not_authenticated:
+            jmp inner_break
+            ; will also break from the inner loop
+            
+            inner_break:
+            ; break for outer loop
+            ; prompt "End Program"
+        break_program_flow:
+        lea dx, exit_text
+        mov ah, 9
+        int 21h
         jmp exit
         
         
