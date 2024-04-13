@@ -17,6 +17,9 @@
     
     enter_username dw "Enter Username: $" ; Output text prompting username
     enter_pass dw "Enter Password: $"     ; Output text prompting password
+    view_update dw "View Grades / Update Grades (v/u): $"
+    logout_student dw "Logout (y): $"
+    logout_teacher dw "Logout? (y/n): $"
     
     entered_username db 20 dup(?)    ; Temporary array for storing and comparing prompted username with registered users 
     entered_password db 20 dup(?)    ; Temporary array for storing and comparing prompted username with registered users password
@@ -31,7 +34,8 @@
     loaded_pass_length dw ?
     loading_pass db 1   ; By default laoding_pass is successful (1). But is 0 if conditions not met. check load_pass
     
-    new_line db 0AH, 0DH, "$"   ; prepared an arr to print new_line                      
+    new_line db 0AH, 0DH, "$"   ; prepared an arr to print new_line
+    space db 32, "$"            ; prepared an arr to print space
     output db 0AH, 0DH, "Your Entered Stirng: $"
     
     elem_num db 0  ; for matching index number of registered_users with the prompted username. (getting the right user and their password)
@@ -92,15 +96,14 @@
         mov dx, length
         mov password_length, dl
         
-        lea dx, output
-        mov ah, 9
-        int 21h
+        ;lea dx, output             ; uncomment
+        ;mov ah, 9                  ; uncomment
+        ;int 21h                    ; uncomment
         
-        lea si, entered_password
-        call print
+        ;lea si, entered_password   ; uncomment
+        ;call print                 ; uncomment
         
         lea si, registered_users
-        ;add username_length, 1
         mov ax, username_length
         add ax, 1
         call check_valid_username
@@ -112,7 +115,7 @@
         int 21h
         
         mov si, store_pass_start_idx
-        call print
+        ;call print
         
         mov bx, store_pass_last_idx
         sub bx, store_pass_start_idx
@@ -121,30 +124,70 @@
         
         call authenticate
         
-        call get_role_id_marks
-        mov dl, set_role
-        mov ah, 2
-        int 21h
-        
-        mov dl, set_id
-        ;add dl, 30
-        mov ah, 2
-        int 21h
-        
-        
-        mov si, set_marks
-        mov ah, 2
-        
-        print_marks:
-            mov dx, [si]
-            cmp dl, "$"
-            je exit_print_marks
-            inc si
+        if_authenticated:
+            lea dx, new_line
+            mov ah, 9
             int 21h
-            jmp print_marks
+            lea si, entered_username
+            call print
         
-        exit_print_marks:
+            lea dx, new_line
+            mov ah, 9
+            int 21h
+            
+            mov bx, is_authenticated
+            cmp bx, 0
+            je else_not_authenticated
         
+            call get_role_id_marks
+            mov dl, set_role
+            cmp dl, "s"
+            je loggedin_student_info
+            jmp loggedin_teacher
+            
+            loggedin_student_info:
+                mov dl, set_id
+                ;add dl, 30
+                mov ah, 2
+                int 21h
+                
+                lea dx, space
+                mov ah, 9
+                int 21h
+                
+                mov si, set_marks
+                mov ah, 2
+                
+                print_marks:
+                    mov dx, [si]
+                    cmp dl, "$"
+                    je exit_print_marks
+                    inc si
+                    int 21h
+                    jmp print_marks
+                
+                exit_print_marks:
+                jmp logout_option_stu
+            
+            loggedin_teacher:
+                lea si, view_update
+                call print
+            
+            
+            logout_option_stu:
+            ; out of 2 loops the inner "break" statement will go here
+            ; only add 'y' for student
+                lea dx, new_line
+                mov ah, 9
+                int 21h
+                lea si, logout_student
+                call print
+        
+        else_not_authenticated:
+        ; will also break from the inner loop
+        
+        break:
+        ; break for outer loop
         jmp exit
         
         
@@ -300,7 +343,16 @@
                 exit_per_pass:
                 sub si, 1
                 mov store_pass_start_idx, si           
-                call print
+                ;call print
+                
+                traverse_to_end_si:
+                    mov dx, [si]
+                    cmp dl, "$"
+                    je exit_traverse_to_end_si
+                    inc si
+                    jmp traverse_to_end_si
+                
+                exit_traverse_to_end_si:
                 mov store_pass_last_idx, si
                 jmp exit_load_pass
                 
