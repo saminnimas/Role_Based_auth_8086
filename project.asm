@@ -9,18 +9,20 @@
     password_arr db "vic$", "Batcave28$", "raider$", "lane$", "enjoy$", "pam$", "%"  ; for varifying if the user_input for password is valid
     user_role db "t", "t", "s", "s", "s", "s", "%"  ; For Distinguishing between teachers and students
     id_s db "0", "0", "1", "2", "3", "4", "%"
-    marks db "0$", "0$", "86$", "80$", "100$", "79$", "%"
+    marks db "0$$", "0$$", "86$$", "80$$", "100$", "79$$", "%"
     
     incorrect_input db 0AH, 0DH, "Incorrect Username/Password$"
     validated db 0AH, 0DH, "!!WELCOME!!$"
     exit_text db 0AH, 0DH, "BYE  :($"
-    l dw ?  
+    l dw ?
+    title_tags db 0AH, 0DH, "ID         Name        Marks$"  
     
     enter_username dw "Enter Username: $" ; Output text prompting username
     enter_pass dw "Enter Password: $"     ; Output text prompting password
     view_update dw "View Grades / Update Grades (v/u): $"
     logout_student dw "Logout (y): $"
     logout_teacher dw "Logout? (y/n): $"
+    end_program dw "End Program? (y/n): $"
     
     entered_username db 20 dup(?)    ; Temporary array for storing and comparing prompted username with registered users 
     entered_password db 20 dup(?)    ; Temporary array for storing and comparing prompted username with registered users password
@@ -29,6 +31,8 @@
     set_id db ?
     set_marks dw ?
     loggedout db ?
+    options db ?
+    entered_end_program db ?
     
     length dw ?   ; Temporary variable
     username_length dw ?    ; returned length from the "lencounter" procedure will be sotred here
@@ -43,6 +47,9 @@
     elem_num db 0  ; for matching index number of registered_users with the prompted username. (getting the right user and their password)
     store_pass_start_idx dw 0  ; for storing the si, calculated from load_pass func
     store_pass_last_idx dw 0  ; for storing the last si, calculated from load_pass func, to get the stored pass's length
+    student_username_si dw ?
+    student_id_si dw ?
+    student_mark_si dw ?
      
    
 .CODE  
@@ -54,6 +61,7 @@
         ; YOUR CODE STARTS HERE
         
         ;call debug_si
+
         
         program_flow:
             lea dx, enter_username
@@ -151,14 +159,32 @@
                     jmp loggedin_teacher
                     
                     loggedin_student_info:
+                                
+                        lea dx, title_tags
+                        mov ah, 9
+                        int 21h
+                        
+                        lea dx, new_line
+                        mov ah, 9
+                        int 21h
+                        
                         mov dl, set_id
-                        ;add dl, 30
                         mov ah, 2
                         int 21h
                         
-                        lea dx, space
-                        mov ah, 9
-                        int 21h
+                        ;lea dx, space
+                        ;mov ah, 9
+                        ;int 21h
+                        call print_spaces
+                        
+                        lea si, entered_username
+                        call print
+                        
+                        ;lea dx, space
+                        ;mov ah, 9
+                        ;int 21h
+                        call print_spaces
+                        
                         
                         mov si, set_marks
                         mov ah, 2
@@ -175,19 +201,48 @@
                         jmp logout_option_stu
                     
                     loggedin_teacher:
+                        call view_grades
                         lea si, view_update
                         call print
+                        
+                        lea si, options
+                        call take_input
+                        
+                        lea si, options
+                        mov bx, [si]
+                        cmp bl, "v"
+                        je jump_to_view
+                        cmp bl, "u"
+                        je jump_to_update
+                        jmp invalid_key
+                        
+                        jump_to_view:
+                            jmp exit_options
+                        
+                        jump_to_update:
+                            jmp exit_options
+                        
+                        invalid_key:
+                            jmp exit_options
+                        
+                        
+                        exit_options:
                         lea dx, new_line
                         mov ah, 9
                         int 21h
-                        lea si, logout_teacher
-                        call print
+                        
+                        lea dx, logout_teacher
+                        mov ah, 9
+                        int 21h
+                        
                         lea si, loggedout
                         call take_input
+                        
                         lea si, loggedout
                         mov bx, [si]
                         cmp bl, "y"
                         je break_loggedin_flow
+                        
                         lea dx, new_line
                         mov ah, 9
                         int 21h
@@ -200,8 +255,9 @@
                         lea dx, new_line
                         mov ah, 9
                         int 21h
-                        lea si, logout_student
-                        call print
+                        lea dx, logout_student
+                        mov ah, 9
+                        int 21h
                         lea si, loggedout
                         call take_input
                         lea si, loggedout
@@ -214,14 +270,43 @@
                         jmp if_authenticated
             
             break_loggedin_flow:
-            jmp inner_break
-            else_not_authenticated:
-            jmp inner_break
-            ; will also break from the inner loop
+                lea dx, new_line
+                mov ah, 9
+                int 21h
+                lea dx, end_program
+                mov ah, 9
+                int 21h
+                lea si, entered_end_program
+                call take_input
+                
+                lea si, entered_end_program
+                mov bx, [si]
+                cmp bl, "y"
+                je break_program_flow
+                lea dx, new_line
+                mov ah, 9
+                int 21h
+                jmp program_flow
             
-            inner_break:
-            ; break for outer loop
-            ; prompt "End Program"
+            else_not_authenticated:
+                lea dx, new_line
+                mov ah, 9
+                int 21h
+                lea dx, end_program
+                mov ah, 9
+                int 21h
+                lea si, entered_end_program
+                call take_input
+                
+                lea si, entered_end_program
+                mov bx, [si]
+                cmp bl, "y"
+                je break_program_flow
+                lea dx, new_line
+                mov ah, 9
+                int 21h
+                jmp program_flow
+
         break_program_flow:
         lea dx, exit_text
         mov ah, 9
@@ -250,7 +335,6 @@
         take_input endp
         ;take_input end
         
-
         
         
         ;print start
@@ -515,12 +599,20 @@
                 inner_while:
                     mov dx, [si]
                     cmp dl, "$"
-                    je exit_inner_while
+                    je iterate_dollar
                     inc si
                     jmp inner_while
+                
+                iterate_dollar:
+                    inc si
+                    mov dx, [si]
+                    
+                    cmp dl, "$"
+                    je iterate_dollar
+                    jmp exit_inner_while
+                    
                 exit_inner_while:
                 dec bl
-                inc si
                 jmp while_for_marks
                 
             exit_while_for_marks:
@@ -534,25 +626,117 @@
         
         
         ; algorithm for updating start
-        ;lea si, marks
-        ;mov bx, 0
-        ;add si, 5
-        ;mov cx, 2
-        ;mov ah, 2
-        ;while:
-            ;mov bl, str[al]    
-            ;mov [si], bl
-            ;mov al, str[bx]
-            ;mov [si], al
-            ;int 21h
-            ;inc bx
-            ;inc si
-        ;loop while
+        update proc
+            ;lea si, str  ; save the updated marks here
+            ;call lencounter
+            ;mov bx, length
+            ;mov strlen, bl
+            
+            ;lea si, marks
+            ;mov bl, strlen
+            ;add bl, 1
+            ;mov cx, bx
+            ;mov bx, 0
+            ;add si, 3 ; elem_num will go here
+            ;while:
+                ;mov al, str[bx]
+                ;mov [si], al
+                ;inc bx
+                ;inc si
+            ;loop while
+        ret
+        update endp
         ; algorithm for updating end
         
+        view_grades proc
+            lea si, registered_users
+            mov bx, 2  ; counter
+            for_stu_si:
+                cmp bl, 0
+                je exit_for_stu_si
+                mov dx, [si]
+                cmp dl, "$"
+                je decrement_counter
+                inc si
+                jmp for_stu_si
+                
+                decrement_counter:
+                    dec bx
+                    inc si
+                    jmp for_stu_si
+                exit_for_stu_si:
+                    dec si
+                    mov student_username_si, si
+            
+            lea si, id_s
+            mov bx, 2  ; counter
+            for_id_si:
+                cmp bl, 0
+                je exit_for_id_si
+                inc si
+                dec bx
+                exit_for_id_si:
+                    inc si
+                    mov student_id_si, si
+                    
+                    
+            lea si, marks
+            mov bl, 2
+            
+            for_mark_si:
+                cmp bl, 0
+                je exit_for_mark_si
+                inner_while_loop:
+                    mov dx, [si]
+                    cmp dl, "$"
+                    je iterate_dollars
+                    inc si
+                    jmp inner_while_loop
+                
+                iterate_dollars:
+                    inc si
+                    mov dx, [si]
+                    
+                    cmp dl, "$"
+                    je iterate_dollars
+                    jmp exit_inner_while_loop
+                    
+                exit_inner_while_loop:
+                dec bl
+                jmp for_mark_si
+                
+            exit_for_mark_si:
+            ;sub si, 1
+            mov student_mark_si, si
+                
+            mov si, student_mark_si
+            mov ah, 2
+            
+            while1:
+                mov dx, [si]
+                cmp dl, "%"
+                je exit_while1
+                inc si
+                int 21h
+                jmp while1
+        
+            exit_while1:
+            
+            
+        ret
+        view_grades endp
         
         
-        
+        print_spaces proc
+            mov cx, 10
+            keep_spacing:
+                lea dx, space
+                mov ah, 9
+                int 21h
+            loop keep_spacing
+            
+        ret
+        print_spaces endp
         
         
         debug_si proc

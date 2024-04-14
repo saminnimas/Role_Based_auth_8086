@@ -2,18 +2,20 @@
 i) only a student can check his grade. DONE
 ii) make another role called teacher who will be able to check or update their grades. DONE
 iii) check if the user is a student or a teacher. DONE
-iv) allow marks entry only if user is a teacher.
+iv) allow marks entry only if user is a teacher. DONE
 """
 registered_users = ['bruce', 'victor', 'lara', 'clerk', 'joy', 'jim', 'sumbul', 'tim']  # put only usernames here
 passwords_arr = ["Batcave28", "vic", "raider", "lane", "enjoy", "pam", "harem", "code"]  # map user passwords with registered_users
 user_role = ['t', 't', 's', 's', 's', 's', 's', 's']
 id_s = [0, 0, 1, 2, 3, 4, 5, 6]
 marks = [0, 0, 85, 80, 95, 75, 39, 66]
+new_user, n_user_id, new_user_marks = [], [], []
 
 
 while True:
     username = input("Enter Username: ")
     password = input('Enter Password: ')
+    new_added = 0
     while True:
         def len_counter(user) -> int:
             length = 0
@@ -89,6 +91,18 @@ while True:
                     # this print statement above is just for demo purpose. Ignore in main project
 
 
+        def view_new_users(new_u, new_id, new_marks):
+            if len(new_u) > 0:
+                for i in range(len(new_u)):
+                    if len(new_u[i]) == 3:
+                        print(f"{new_id[i]}            {new_u[i]}            {new_marks[i]}")
+                    else:
+                        print(str(new_id[i]) + (12 * ' ') + str(new_u[i]) + (
+                                12 - (len(new_u[i]) - 3)) * ' ' + str(new_marks[i]))
+            else:
+                return None
+
+
         def update_grades(reg_user, mark_arr):
             select_id = int(input("Enter ID: ")) + 2
             if 0 < select_id < len(id_s) + 1:
@@ -99,6 +113,17 @@ while True:
                 print(f"ID: {select_id}, Name: {reg_user[select_id - 1]}, Marks: {mark_arr[select_id - 1]}")
             else:
                 print("Invalid ID")
+
+
+        def add_user(new_u, new_id, new_marks, added):
+            print(f"Id must be >= {6 + added}")
+            new_users_id = int(input("Enter New User's ID: "))
+            new_users_name = input("Enter New User's Username: ")
+            new_users_marks = input("Enter New User's Marks: ")
+            new_u.append(new_users_name)
+            new_id.append(new_users_id)
+            new_marks.append(new_users_marks)
+
 
         # the valid_username had to be written in a redundant form; to replicate the structure of procedural programming of 8086
         # valid_user="Invalid username" if not valid_username(username, username_length, '123', registered_users) else "WElCOME"
@@ -118,9 +143,15 @@ while True:
                 options = input("View Student Grades / Update Grade / Add Student? (v/u/a) ")
                 if options == 'v':
                     view_grade(id_s, registered_users, marks)
+                    view_new_users(new_user, n_user_id, new_user_marks)
                 elif options == "u":
                     update_grades(registered_users, marks)
                     view_grade(id_s, registered_users, marks)
+
+                elif options == 'a':
+                    new_added += 1
+                    add_user(new_user, n_user_id, new_user_marks, new_added)
+                    view_new_users(new_user, n_user_id, new_user_marks)
             else:
                 print("Student's Profile")
                 print("ID           Name          Marks")
