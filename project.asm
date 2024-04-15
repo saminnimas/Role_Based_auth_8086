@@ -24,6 +24,7 @@
     logout_teacher dw "Logout? (y/n): $"
     end_program dw "End Program? (y/n): $"
     id_for_update dw "Enter ID: $"
+    enter_marks dw "Enter Marks: $"
     
     entered_username db 20 dup(?)    ; Temporary array for storing and comparing prompted username with registered users 
     entered_password db 20 dup(?)    ; Temporary array for storing and comparing prompted username with registered users password
@@ -53,7 +54,7 @@
     student_mark_si dw ?
     loop_var db ?
     strlen db ?
-    str db "62$"  ; Updated marks will be saved here temporarily
+    str db 5 dup(?)  ; Updated marks will be saved here temporarily
     update_id db ?
     mark_si_for_update db ?
      
@@ -303,7 +304,12 @@
                             int 21h
                             lea si, update_id
                             call take_input
+                            
+                            
+                            
+                            
                             lea si, update_id
+                            
                             set_si_for_update:
                                 mov bx, [si]
                                 cmp bl, "1"
@@ -317,15 +323,47 @@
                             
                             six:     
                                 mov mark_si_for_update, 6
+                                lea dx, new_line
+                                mov ah, 9
+                                int 21h
+                                lea dx, enter_marks
+                                mov ah, 9
+                                int 21h
+                                lea si, str
+                                call take_input
                                 jmp exit_set_si_for_update 
                             ten:     
                                 mov mark_si_for_update, 10
+                                lea dx, new_line
+                                mov ah, 9
+                                int 21h
+                                lea dx, enter_marks
+                                mov ah, 9
+                                int 21h
+                                lea si, str
+                                call take_input
                                 jmp exit_set_si_for_update
                             fourteen:     
                                 mov mark_si_for_update, 14
+                                lea dx, new_line
+                                mov ah, 9
+                                int 21h
+                                lea dx, enter_marks
+                                mov ah, 9
+                                int 21h
+                                lea si, str
+                                call take_input
                                 jmp exit_set_si_for_update
                             eighteen:     
                                 mov mark_si_for_update, 18
+                                lea dx, new_line
+                                mov ah, 9
+                                int 21h
+                                lea dx, enter_marks
+                                mov ah, 9
+                                int 21h
+                                lea si, str
+                                call take_input
                                 jmp exit_set_si_for_update
                             exit_set_si_for_update:
                             call update
