@@ -23,6 +23,7 @@
     logout_student dw "Logout (y): $"
     logout_teacher dw "Logout? (y/n): $"
     end_program dw "End Program? (y/n): $"
+    id_for_update dw "Enter ID: $"
     
     entered_username db 20 dup(?)    ; Temporary array for storing and comparing prompted username with registered users 
     entered_password db 20 dup(?)    ; Temporary array for storing and comparing prompted username with registered users password
@@ -51,6 +52,10 @@
     student_id_si dw ?
     student_mark_si dw ?
     loop_var db ?
+    strlen db ?
+    str db "62$"  ; Updated marks will be saved here temporarily
+    update_id db ?
+    mark_si_for_update db ?
      
    
 .CODE  
@@ -206,8 +211,11 @@
                         ;mov si, student_username_si
                         ;call print
                         ;mov student_username_si, si
-                        lea si, view_update
-                        call print
+                        lea dx, view_update
+                        ;call print
+                        mov ah, 9
+                        int 21h
+                        
                         
                         lea si, options
                         call take_input
@@ -287,6 +295,40 @@
                             jmp exit_options
                         
                         jump_to_update:
+                            lea dx, new_line
+                            mov ah, 9
+                            int 21h
+                            lea dx, id_for_update
+                            mov ah, 9
+                            int 21h
+                            lea si, update_id
+                            call take_input
+                            lea si, update_id
+                            set_si_for_update:
+                                mov bx, [si]
+                                cmp bl, "1"
+                                je six
+                                cmp bl, "2"
+                                je ten 
+                                cmp bl, "3"
+                                je fourteen 
+                                cmp bl, "4"
+                                je eighteen
+                            
+                            six:     
+                                mov mark_si_for_update, 6
+                                jmp exit_set_si_for_update 
+                            ten:     
+                                mov mark_si_for_update, 10
+                                jmp exit_set_si_for_update
+                            fourteen:     
+                                mov mark_si_for_update, 14
+                                jmp exit_set_si_for_update
+                            eighteen:     
+                                mov mark_si_for_update, 18
+                                jmp exit_set_si_for_update
+                            exit_set_si_for_update:
+                            call update
                             jmp exit_options
                         
                         invalid_key:
@@ -686,7 +728,7 @@
             ;sub si, 1
             mov set_marks, si
             
-    
+ 
         
         ret
         get_role_id_marks endp
@@ -727,23 +769,28 @@
         
         ; algorithm for updating start
         update proc
-            ;lea si, str  ; save the updated marks here
-            ;call lencounter
-            ;mov bx, length
-            ;mov strlen, bl
+            mov bx, 0
+            lea si, str  ; save the updated marks here
+            call lencounter
+            mov bx, length
+            mov strlen, bl
             
-            ;lea si, marks
-            ;mov bl, strlen
-            ;add bl, 1
-            ;mov cx, bx
-            ;mov bx, 0
-            ;add si, 3 ; elem_num will go here
-            ;while:
-                ;mov al, str[bx]
-                ;mov [si], al
-                ;inc bx
-                ;inc si
-            ;loop while
+            lea si, marks
+            mov bl, strlen
+            add bl, 1
+            mov cx, bx
+            mov bx, 0
+            mov bl, mark_si_for_update
+            add si, bx
+            mov bx, 0
+            ;mov dl, mark_si_for_update
+            
+            while:
+                mov al, str[bx]
+                mov [si], al
+                inc bx
+                inc si
+            loop while
         ret
         update endp
         ; algorithm for updating end
