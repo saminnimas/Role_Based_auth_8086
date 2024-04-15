@@ -203,9 +203,9 @@
                     
                     loggedin_teacher:
                         call view_grades
-                        mov si, student_username_si
-                                call print
-                                mov student_username_si, si
+                        ;mov si, student_username_si
+                        ;call print
+                        ;mov student_username_si, si
                         lea si, view_update
                         call print
                         
@@ -221,8 +221,8 @@
                         jmp invalid_key
                         
                         jump_to_view:
-                            mov si, student_username_si
-                                call print
+                            ;mov si, student_username_si
+                            ;call print
                                 
                             lea dx, title_tags
                             mov ah, 9
@@ -243,23 +243,38 @@
                                 int 21h
                                 add student_id_si, 1
                                 
-                                
+                                mov bx, 0
                                 call print_spaces
                                 mov si, student_username_si
                                 add si, 1
+                                call lencounter
+                                
+                                mov si, student_username_si
+                                add si, 1
+                                
                                 call print
                                 mov student_username_si, si
                                 
                                 
-                                call print_spaces
+                                ;call print_spaces
+                                
+                                mov ax, 10
+                                sub length, 3
+                                sub ax, length
+                                mov cx, ax
+                                custom_keep_spacing:
+                                    lea dx, space
+                                    mov ah, 9
+                                    int 21h
+                                loop custom_keep_spacing
                                 
                                 
-                                ;!!FIX THIS!!
-                                lea si, student_mark_si
+                                
+                                mov si, student_mark_si
                                 mov bl, 1
                                 call custom_perse_for_marks
                                 mov student_mark_si, si
-                                ;!!FIX THIS!!
+                                
                                 
                                 lea dx, new_line
                                 mov ah, 9
