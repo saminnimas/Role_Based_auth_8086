@@ -50,6 +50,7 @@
     student_username_si dw ?
     student_id_si dw ?
     student_mark_si dw ?
+    loop_var db ?
      
    
 .CODE  
@@ -202,6 +203,9 @@
                     
                     loggedin_teacher:
                         call view_grades
+                        mov si, student_username_si
+                                call print
+                                mov student_username_si, si
                         lea si, view_update
                         call print
                         
@@ -217,6 +221,54 @@
                         jmp invalid_key
                         
                         jump_to_view:
+                            mov si, student_username_si
+                                call print
+                                
+                            lea dx, title_tags
+                            mov ah, 9
+                            int 21h
+                            
+                            lea dx, new_line
+                            mov ah, 9
+                            int 21h
+                            
+                            mov loop_var, 4
+                            print_view_loop:
+                                mov bl, loop_var
+                                cmp bl, 0
+                                je exit_print_view_loop
+                                mov si, student_id_si
+                                mov dx, [si]
+                                mov ah, 2
+                                int 21h
+                                add student_id_si, 1
+                                
+                                
+                                call print_spaces
+                                mov si, student_username_si
+                                add si, 1
+                                call print
+                                mov student_username_si, si
+                                
+                                
+                                call print_spaces
+                                
+                                
+                                ;!!FIX THIS!!
+                                lea si, student_mark_si
+                                mov bl, 1
+                                call custom_perse_for_marks
+                                mov student_mark_si, si
+                                ;!!FIX THIS!!
+                                
+                                lea dx, new_line
+                                mov ah, 9
+                                int 21h
+                                mov bl, loop_var
+                                dec bx
+                                mov loop_var, bl
+                                jmp print_view_loop
+                            exit_print_view_loop:
                             jmp exit_options
                         
                         jump_to_update:
@@ -617,12 +669,45 @@
                 
             exit_while_for_marks:
             ;sub si, 1
-            mov set_marks, si 
-               
+            mov set_marks, si
+            
+    
         
         ret
         get_role_id_marks endp
         ; get_role_id_marks end
+        
+        custom_perse_for_marks proc
+            
+            cwhile_for_marks:
+                cmp bl, 0
+                je cexit_while_for_marks
+                mov ah, 2
+                cinner_while:
+                    mov dx, [si]
+                    cmp dl, "$"
+                    je citerate_dollar
+                    inc si
+                    int 21h
+                    jmp cinner_while
+                
+                citerate_dollar:
+                    inc si
+                    mov dx, [si]
+                    
+                    cmp dl, "$"
+                    je citerate_dollar
+                    jmp cexit_inner_while
+                    
+                cexit_inner_while:
+                dec bl
+                jmp cwhile_for_marks
+                
+            cexit_while_for_marks:
+                ;sub si, 1
+                ;mov set_marks, si
+        ret    
+        custom_perse_for_marks endp
         
         
         ; algorithm for updating start
@@ -709,18 +794,18 @@
             ;sub si, 1
             mov student_mark_si, si
                 
-            mov si, student_mark_si
-            mov ah, 2
+            ;mov si, student_username_si
+            ;mov ah, 2
             
-            while1:
-                mov dx, [si]
-                cmp dl, "%"
-                je exit_while1
-                inc si
-                int 21h
-                jmp while1
+            ;while1:
+            ;    mov dx, [si]
+            ;    cmp dl, "%"
+            ;    je exit_while1
+            ;    inc si
+            ;    int 21h
+            ;    jmp while1
         
-            exit_while1:
+            ;exit_while1:
             
             
         ret
