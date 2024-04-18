@@ -563,9 +563,6 @@
                     jg return_false
                     jmp outer_loop
                 
- 
-                ;mov ah, 2
-                ;int 21h
                 jmp outer_loop
         
         
@@ -575,9 +572,6 @@
         
         return_false:
             mov elem_num, 0
-            ;lea dx, incorrect_input
-            ;mov ah, 9
-            ;int 21h
             
         exit_func:    
         ret
@@ -682,7 +676,7 @@
                 je exit_authenticate
             
             
-            
+           
             authentication_false:
                 mov is_authenticated, 0
                 jmp exit_authenticate
