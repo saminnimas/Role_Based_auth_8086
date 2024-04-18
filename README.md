@@ -27,3 +27,6 @@ git clone https://github.com/saminnimas/Role_Based_auth_8086.git
 3. The algorithm works by "indirectly indexing" the first 5 arrays; so match the index number for username and password to input proper user credentials.
 4. For example: for the username 'victor' password is 'vic', for user 'joy' password is 'enjoy'; hope you get the drift.
 5. Enjoy :sunglasses:
+
+__Checkout main.py to get a better understanding for the algorithm; I've made things easy for you.
+This python script is basically a corresponding representation of main.asm; because I basically developed the program in python first and then translated it to assembly.__ 
