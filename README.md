@@ -22,7 +22,8 @@ git clone link
 
 ## Login Credentials (when the program runs)
 1. Open the main.asm source file.
-2. The first 2 arrays (registerd_users and password_arr) have the usernames and password.
+2. The first 2 arrays (registered_users and password_arr) have the usernames and password.
+![](C:\Users\SkyN3\PycharmProjects\pythonProject3\indirect_indexed.png)
 3. The algorithm works by "indirectly indexing" the first 5 arrays; so match the index number for username and password to input proper user credentials.
 4. For example: for the username 'victor' password is 'vic', for user 'joy' password is 'enjoy'; hope you get the drift.
 5. Enjoy :sunglasses:
