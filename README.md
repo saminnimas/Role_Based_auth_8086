@@ -29,4 +29,5 @@ git clone https://github.com/saminnimas/Role_Based_auth_8086.git
 5. Enjoy :sunglasses:
 
 __Checkout main.py to get a better understanding for the algorithm; I've made things easy for you.
-This python script is basically a corresponding representation of main.asm; because I basically developed the program in python first and then translated it to assembly.__ 
+This python script is basically a corresponding representation of main.asm; because I developed the program in python first and then translated it to assembly.
+I'll recommend the running the python file first to better understand the program flow of this project. (The "Add Student" feature was not implemented to main.asm. Will do in future :wink:)__ 
