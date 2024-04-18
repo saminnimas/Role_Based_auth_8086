@@ -16,7 +16,7 @@ The project aims to implement role-based authentication for a grading management
 ## Installation:
 1. Clone this repository first using:  
 ```bash
-git clone link
+git clone https://github.com/saminnimas/Role_Based_auth_8086.git
 ```
 2. Install "emu8086" emulator to run the main.asm file in it.
 
